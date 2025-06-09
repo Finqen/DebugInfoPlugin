@@ -1,6 +1,6 @@
 # DebugInfoPlugin
 
-## Clang plugin for enhancin debug information on binaries compiled with optimization
+## Clang plugin for enhancing debug information on binaries compiled with optimization
 
 ### Usage
 
