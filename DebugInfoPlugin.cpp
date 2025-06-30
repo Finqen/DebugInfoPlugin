@@ -25,13 +25,14 @@ public:
       }
     }
 
-    // HANDLE FUN DECL
+        // HANDLE FUN DECL
     if (const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("funcDecl")) {
       FullSourceLoc FullLocation = Result.Context->getFullLoc(FD->getBeginLoc());
       if (FullLocation.isValid()) {
-        llvm::errs() << "Function declared: " << FD->getNameAsString()
-                     << " at " << FullLocation.getSpellingLineNumber()
-                     << ":" << FullLocation.getSpellingColumnNumber() << "\n";
+        llvm::errs() << "Inlined function found: " << "\n"
+                     << "name: " << FD->getNameAsString() << "\n"
+                     << "line " << FullLocation.getSpellingLineNumber() << "\n"
+                     << "column " << FullLocation.getSpellingColumnNumber() << "\n";
       }
     }
   }
@@ -43,8 +44,9 @@ class DebugEnhancerASTConsumer : public ASTConsumer {
 
 public:
   DebugEnhancerASTConsumer() {
-    Matcher.addMatcher(varDecl(isExpansionInMainFile()).bind("varDecl"), &Handler);
-    Matcher.addMatcher(functionDecl(isExpansionInMainFile()).bind("funcDecl"), &Handler);
+    // Matcher.addMatcher(varDecl(isExpansionInMainFile()).bind("varDecl"), &Handler);
+    // Matcher for main file and inlined function
+    Matcher.addMatcher(functionDecl(isExpansionInMainFile(), isInline()).bind("funcDecl"), &Handler);
   }
 
   void HandleTranslationUnit(ASTContext &Context) override {

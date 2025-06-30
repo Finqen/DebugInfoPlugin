@@ -6,4 +6,4 @@
 
 > cd build && cmake .. && make
 
-> cd .. && clang -Xclang -load -Xclang build/libDebugInfoPlugin.so test/test.c 
+> clang -g -O3 -Xclang -load -Xclang build/libDebugInfoPlugin.so test/inline.c -o test/inline
