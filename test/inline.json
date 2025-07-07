@@ -1,0 +1,22 @@
+{
+  "functions": {
+    "0": {
+      "symbol_name": "foo",
+      "calling_convention": "cdecl",
+      "return_registers": ["eax", "edx"],
+      "clobbered_registers": ["ebx", "ecx"],
+      "source_match": {
+        "confidence": 1,
+        "line": 1,
+        "function_name": "foo",
+        "file": "inlined from test/inline.c",
+        "return_value": {
+            "type": "int"        },
+        "parameters": {
+          },
+        "local_variables": {
+          }
+      }
+  }
+  }
+}

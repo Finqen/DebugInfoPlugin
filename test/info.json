@@ -1,0 +1,31 @@
+{
+  "functions": {
+    "0x12345678": {
+      "symbol_name": "function_name",
+      "calling_convention": "cdecl",
+      "return_registers": ["eax", "edx"],
+      "clobbered_registers": ["ebx", "ecx"],
+      "source_match": {
+        "confidence": 1,
+        "file": "inlined from file /usr/bin/debug/example.c",
+        "line": 42,
+        "function": "function_name",
+        "return_value": {
+          "type": "int"
+        },
+        "parameters": {
+          "param1": {
+            "name": "param1",
+            "type": "int"
+          }
+        },
+        "local_variables": {
+          "local1": {
+            "name": "local1",
+            "type": "char*"
+          }
+        }
+      }
+    }
+  }
+}
