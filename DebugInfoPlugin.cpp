@@ -89,6 +89,7 @@ public:
     }
     */
 
+    /*
         // HANDLE FUN DECL
     if (const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("funcDecl")) {
       FullSourceLoc FullLocation = Result.Context->getFullLoc(FD->getBeginLoc());
@@ -100,6 +101,26 @@ public:
                      << "column " << FullLocation.getSpellingColumnNumber() << "\n";
       }
     }
+    */
+
+    if (const CallExpr *CE = Result.Nodes.getNodeAs<CallExpr>("callExpr")) {
+    const FunctionDecl *FD = CE->getDirectCallee();
+    if (FD && FD->isInlineSpecified()) { // Only log inline functions
+        FullSourceLoc FullLocation = Result.Context->getFullLoc(CE->getExprLoc());
+        if (FullLocation.isValid()) {
+            addInlinedFunction(
+                FD->getNameAsString(),
+                FullLocation.getSpellingLineNumber(),
+                FullLocation.getSpellingColumnNumber());
+
+            llvm::errs() << "Inlined function call found:\n"
+                         << "callee: " << FD->getNameAsString() << "\n"
+                         << "line: " << FullLocation.getSpellingLineNumber() << "\n"
+                         << "column: " << FullLocation.getSpellingColumnNumber() << "\n";
+        }
+      }
+    }
+
   }
 };
 
@@ -111,7 +132,9 @@ public:
   DebugEnhancerASTConsumer() {
     // Matcher.addMatcher(varDecl(isExpansionInMainFile()).bind("varDecl"), &Handler);
     // Matcher for main file and inlined function
-    Matcher.addMatcher(functionDecl(isExpansionInMainFile(), isInline()).bind("funcDecl"), &Handler);
+    Matcher.addMatcher(
+        callExpr(isExpansionInMainFile()).bind("callExpr"),
+        &Handler);
   }
 
   void HandleTranslationUnit(ASTContext &Context) override {

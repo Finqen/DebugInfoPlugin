@@ -1,0 +1,14 @@
+{
+    "bar": {
+        "definition": 1,
+        "calls": [
+            11
+        ]
+    },
+    "foo": {
+        "definition": 6,
+        "calls": [
+            12
+        ]
+    }
+}
