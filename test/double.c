@@ -1,13 +1,18 @@
-static inline int bar(int a, int b) {
+inline int bar(int a, int b) {
 	return a - b;
 }
 
 
-static inline int foo(int a, int b) {
+inline int foo(int a, int b) {
 	return a + b;
 }
 
+void baz() {
+	int x = bar(3,2);
+	int y = foo(2,3);
+}
+
 int main() {
-	int x = foo(1, 4);
-	return x;
+	baz();
+	return 0;
 }

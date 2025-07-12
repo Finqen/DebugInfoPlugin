@@ -1,0 +1,16 @@
+{
+    "bar": {
+        "definition": 1,
+        "calls": [
+            11
+        ],
+        "filename": "test/double.c"
+    },
+    "foo": {
+        "definition": 6,
+        "calls": [
+            12
+        ],
+        "filename": "test/double.c"
+    }
+}
