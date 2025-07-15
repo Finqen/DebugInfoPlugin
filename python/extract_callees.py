@@ -53,10 +53,45 @@ def extract_object_files_from_binary(binary_path, temp_dir):
     
     return list(set(object_files))  # Remove duplicates
 
+def find_real_clang():
+    """Find the real clang binary, bypassing any wrapper scripts"""
+    # Try common locations for the real clang
+    possible_paths = [
+        "/usr/bin/clang",
+        "/usr/local/bin/clang", 
+        "/opt/llvm/bin/clang",
+        "clang"  # fallback to PATH
+    ]
+    
+    for path in possible_paths:
+        try:
+            # Check if this is the real clang (not a wrapper)
+            result = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=5)
+            if result.returncode == 0 and "clang version" in result.stdout:
+                return path
+        except:
+            continue
+    
+    # If we can't find real clang, use which command
+    try:
+        result = subprocess.run(["which", "clang"], capture_output=True, text=True)
+        if result.returncode == 0:
+            clang_path = result.stdout.strip()
+            # Avoid the wrapper in /usr/sbin/clang
+            if clang_path != "/usr/sbin/clang":
+                return clang_path
+    except:
+        pass
+    
+    return "clang"  # fallback
+
 def compile_to_bitcode(source_file, output_file, optimize=False, include_dirs=None, define_flags=None):
     """Compile source file to bitcode with additional flags for package builds"""
     optimization_flag = ["-O3"] if optimize else ["-O0"]
-    command = ["clang", "-g", "-emit-llvm", "-c", source_file, "-o", output_file] + optimization_flag
+    
+    # Use the real clang binary
+    clang_binary = find_real_clang()
+    command = [clang_binary, "-g", "-emit-llvm", "-c", source_file, "-o", output_file] + optimization_flag
     
     # Add include directories
     if include_dirs:
@@ -69,7 +104,12 @@ def compile_to_bitcode(source_file, output_file, optimize=False, include_dirs=No
             command.extend(["-D", define])
     
     try:
-        subprocess.run(command, check=True)
+        # Set up environment with FORCED_OPT if needed
+        env = os.environ.copy()
+        if not env.get('FORCED_OPT'):
+            env['FORCED_OPT'] = optimization_flag[0]  # Set to -O0 or -O3
+        
+        subprocess.run(command, check=True, env=env)
         return True
     except subprocess.CalledProcessError as e:
         print(f"Warning: Failed to compile {source_file}: {e}")
@@ -227,8 +267,23 @@ def main():
                        help='Additional include directories')
     parser.add_argument('--defines', nargs='*', 
                        help='Additional preprocessor defines')
+    parser.add_argument('--clang-path', default=None,
+                       help='Path to clang binary (to bypass wrapper scripts)')
+    parser.add_argument('--forced-opt', default=None,
+                       help='Value for FORCED_OPT environment variable')
     
     args = parser.parse_args()
+    
+    # Set environment variable if provided
+    if args.forced_opt:
+        os.environ['FORCED_OPT'] = args.forced_opt
+    
+    # Set global clang path if provided
+    global CLANG_BINARY
+    if args.clang_path:
+        CLANG_BINARY = args.clang_path
+    else:
+        CLANG_BINARY = find_real_clang()
     
     if not os.path.exists(args.package_dir):
         print(f"Error: Package directory {args.package_dir} does not exist")
